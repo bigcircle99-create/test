@@ -3,7 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>로또 번호 추천기</title>
+  <title>인공지능 동물상 테스트 & 로또 추천기</title>
+
+  <!-- TensorFlow.js and Teachable Machine Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
   <style>
     :root {
@@ -16,6 +20,7 @@
       --set-bg: #f3f6ff;
       --ball-bg: #fff;
       --ball-border: #ddd;
+      --progress-bg: #e0e0e0;
     }
 
     body.dark-mode {
@@ -28,6 +33,7 @@
       --set-bg: #21262d;
       --ball-bg: #30363d;
       --ball-border: #444c56;
+      --progress-bg: #30363d;
     }
 
     body {
@@ -47,8 +53,9 @@
     .card {
       background: var(--card-bg);
       border-radius: 16px;
-      padding: 20px;
+      padding: 24px;
       box-shadow: 0 6px 20px var(--card-shadow);
+      margin-bottom: 24px;
     }
 
     .header {
@@ -58,14 +65,8 @@
       margin-bottom: 20px;
     }
 
-    h1 {
-      margin: 0;
-      font-size: 22px;
-    }
-
-    .row {
-      margin-bottom: 16px;
-    }
+    h1 { margin: 0; font-size: 22px; }
+    h2 { margin-top: 0; font-size: 18px; margin-bottom: 16px; }
 
     button {
       border: 0;
@@ -90,102 +91,116 @@
       color: #c9d1d9;
     }
 
-    .result {
-      margin-top: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .set {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      padding: 10px;
-      border-radius: 12px;
-      background: var(--set-bg);
-    }
-
-    .ball {
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: var(--ball-bg);
-      border: 1px solid var(--ball-border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      color: var(--text-color);
-    }
-
-    .set-label {
-      width: 60px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-    }
-
-    .contact-card {
-      margin-top: 24px;
-    }
-
-    .contact-card h2 {
-      margin-top: 0;
-      font-size: 18px;
-      margin-bottom: 16px;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-
-    .form-group input, 
-    .form-group textarea {
+    /* AI Section Styles */
+    #image-selector {
       width: 100%;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--ball-border);
-      background: var(--ball-bg);
+      border: 2px dashed var(--ball-border);
+      border-radius: 12px;
+      padding: 40px 20px;
+      text-align: center;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: border-color 0.3s;
+    }
+
+    #image-selector:hover { border-color: var(--btn-bg); }
+    #preview-image {
+      max-width: 100%;
+      border-radius: 12px;
+      display: none;
+      margin-bottom: 20px;
+    }
+
+    .result-label {
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: var(--progress-bg);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--btn-bg);
+      width: 0%;
+      transition: width 0.5s ease-out;
+    }
+
+    /* Existing Lotto Styles */
+    .result { display: flex; flex-direction: column; gap: 14px; }
+    .set {
+      display: flex; gap: 8px; flex-wrap: wrap; padding: 10px;
+      border-radius: 12px; background: var(--set-bg);
+    }
+    .ball {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--ball-bg); border: 1px solid var(--ball-border);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       color: var(--text-color);
-      box-sizing: border-box;
-      font-family: inherit;
     }
+    .set-label { width: 60px; font-weight: 700; display: flex; align-items: center; }
 
-    .form-group input:focus, 
-    .form-group textarea:focus {
-      outline: none;
-      border-color: var(--btn-bg);
+    /* Form Styles */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .form-group input, .form-group textarea {
+      width: 100%; padding: 12px; border-radius: 8px;
+      border: 1px solid var(--ball-border); background: var(--ball-bg);
+      color: var(--text-color); box-sizing: border-box; font-family: inherit;
     }
-
   </style>
 </head>
 
 <body>
   <div class="wrap">
-    <div class="card">
-      <div class="header">
-        <h1>로또 번호 추천기 (6/45)</h1>
-        <button id="themeToggle">테마 변경</button>
-      </div>
+    <!-- Header -->
+    <div class="header">
+      <h1>동물상 & 로또 AI</h1>
+      <button id="themeToggle">테마 변경</button>
+    </div>
 
+    <!-- AI Animal Test Card -->
+    <div class="card">
+      <h2>🐾 인공지능 동물상 테스트</h2>
+      <p style="font-size: 14px; opacity: 0.8; margin-bottom: 20px;">
+        사진을 올려 강아지상인지 고양이상인지 확인해보세요!
+      </p>
+      
+      <div id="image-selector" onclick="document.getElementById('upload-input').click()">
+        <span>이곳을 클릭하여 사진 업로드</span>
+        <input type="file" id="upload-input" accept="image/*" style="display:none" onchange="previewFile()">
+      </div>
+      
+      <img id="preview-image" src="#" alt="미리보기">
+      
+      <div id="label-container"></div>
+      
+      <div id="loading-msg" style="display:none; text-align:center;">
+        <p>AI가 분석 중입니다...</p>
+      </div>
+    </div>
+
+    <!-- Lotto Card -->
+    <div class="card">
+      <h2>🎰 로또 번호 추천기</h2>
       <div class="row">
         <button id="btnGen">번호 5세트 추천받기</button>
       </div>
-
       <div id="result" class="result"></div>
     </div>
 
+    <!-- Contact Card -->
     <div class="card contact-card">
-      <h2>제휴 문의</h2>
+      <h2>📧 제휴 문의</h2>
       <form action="https://formspree.io/f/xeelvdoz" method="POST">
         <div class="form-group">
           <label for="email">이메일 주소</label>
@@ -199,69 +214,111 @@
       </form>
     </div>
 
-    <div class="card comment-card" style="margin-top: 24px;">
-      <h2>댓글</h2>
+    <!-- Comment Card -->
+    <div class="card comment-card">
+      <h2>💬 댓글</h2>
       <livere-comment client-id="w6wwXG2EgyfXNGiQRbZj"></livere-comment>
       <script type="module" src="https://www.livere.org/livere-widget.js"></script>
     </div>
   </div>
 
 <script>
-
+// --- Theme Logic ---
 const themeToggle = document.getElementById('themeToggle');
 const body = document.body;
-
-// 초기 테마 설정
-if (localStorage.getItem('theme') === 'dark') {
-  body.classList.add('dark-mode');
-}
-
+if (localStorage.getItem('theme') === 'dark') body.classList.add('dark-mode');
 themeToggle.addEventListener('click', () => {
   body.classList.toggle('dark-mode');
-  const isDark = body.classList.contains('dark-mode');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
 });
 
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+// --- AI Animal Test Logic ---
+const MODEL_URL = "https://teachablemachine.withgoogle.com/models/dMLI4npjC/";
+let model, labelContainer, maxPredictions;
+
+async function initAI() {
+  const modelURL = MODEL_URL + "model.json";
+  const metadataURL = MODEL_URL + "metadata.json";
+  model = await tmImage.load(modelURL, metadataURL);
+  maxPredictions = model.getTotalClasses();
+  labelContainer = document.getElementById("label-container");
 }
 
+async function previewFile() {
+  const preview = document.getElementById('preview-image');
+  const file = document.getElementById('upload-input').files[0];
+  const reader = new FileReader();
+
+  reader.onloadend = async function () {
+    preview.src = reader.result;
+    preview.style.display = 'block';
+    document.getElementById('image-selector').style.display = 'none';
+    
+    document.getElementById('loading-msg').style.display = 'block';
+    if(!model) await initAI();
+    await predict();
+    document.getElementById('loading-msg').style.display = 'none';
+  }
+
+  if (file) {
+    reader.readAsDataURL(file);
+  }
+}
+
+async function predict() {
+  const image = document.getElementById("preview-image");
+  const prediction = await model.predict(image);
+  
+  labelContainer.innerHTML = "";
+  for (let i = 0; i < maxPredictions; i++) {
+    const className = prediction[i].className === "Dog" ? "강아지상 🐶" : "고양이상 🐱";
+    const probability = (prediction[i].probability * 100).toFixed(0);
+    
+    const labelWrapper = document.createElement("div");
+    labelWrapper.innerHTML = `
+      <div class="result-label">
+        <span>${className}</span>
+        <span>${probability}%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: ${probability}%"></div>
+      </div>
+    `;
+    labelContainer.appendChild(labelWrapper);
+  }
+}
+
+// --- Lotto Logic ---
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function pickOneSet() {
   const set = new Set();
-  while (set.size < 6) {
-    set.add(randInt(1, 45));
-  }
+  while (set.size < 6) set.add(randInt(1, 45));
   return Array.from(set).sort((a,b) => a-b);
 }
-
 function generateFiveSets() {
   const resultDiv = document.getElementById("result");
   resultDiv.innerHTML = "";
-
   for (let i = 1; i <= 5; i++) {
     const numbers = pickOneSet();
-
     const setDiv = document.createElement("div");
     setDiv.className = "set";
-
     const label = document.createElement("div");
     label.className = "set-label";
     label.textContent = i + "세트";
     setDiv.appendChild(label);
-
     numbers.forEach(n => {
       const ball = document.createElement("div");
       ball.className = "ball";
       ball.textContent = n;
       setDiv.appendChild(ball);
     });
-
     resultDiv.appendChild(setDiv);
   }
 }
-
 document.getElementById("btnGen").addEventListener("click", generateFiveSets);
 
+// Pre-init AI model to speed up first use
+window.onload = () => { initAI(); };
 </script>
 </body>
 </html>
