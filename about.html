@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>서비스 소개 - 동물상 & 로또 AI</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .about-content {
+      line-height: 1.8;
+      text-align: left;
+    }
+    .about-content h3 {
+      margin-top: 30px;
+      color: var(--btn-bg);
+    }
+    .about-content p {
+      margin-bottom: 20px;
+    }
+    .features-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    .feature-item {
+      background: var(--set-bg);
+      padding: 20px;
+      border-radius: 12px;
+    }
+    @media (max-width: 600px) {
+      .features-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-container">
+      <a href="/" class="logo">🐾 동물상 & 로또 AI</a>
+      <nav class="nav-links">
+        <a href="/">홈</a>
+        <a href="about.html">소개</a>
+        <a href="privacy-policy.html">개인정보처리방침</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="card about-content">
+      <h1>서비스 소개</h1>
+      <p>안녕하세요! <strong>동물상 & 로또 AI</strong>는 인공지능 기술을 활용하여 사용자들에게 일상 속 작은 즐거움을 선사하고자 탄생했습니다. 우리는 복잡한 기술을 누구나 쉽고 재미있게 경험할 수 있는 서비스를 지향합니다.</p>
+
+      <h3>우리의 미션</h3>
+      <p>단순한 재미를 넘어, 최신 AI 기술이 우리의 생활에 어떻게 녹아들 수 있는지 보여주는 것이 우리의 미션입니다. 누구나 쉽고 안전하게 자신의 데이터를 분석해보고, 행운의 번호를 통해 긍정적인 에너지를 얻을 수 있도록 돕습니다.</p>
+
+      <h3>기술 스택 및 작동 방식</h3>
+      <p>본 서비스는 다음과 같은 최신 웹 기술을 기반으로 제작되었습니다.</p>
+      <div class="features-list">
+        <div class="feature-item">
+          <h4>🤖 AI 분석 (TensorFlow.js)</h4>
+          <p>구글의 오픈소스 머신러닝 라이브러리인 TensorFlow.js와 Teachable Machine을 사용하여 브라우저에서 실시간으로 이미지를 분석합니다.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🔒 데이터 보안 (Privacy First)</h4>
+          <p>사용자의 사진 데이터는 서버로 전송되지 않습니다. 모든 계산은 클라이언트 사이드(사용자 기기)에서 이루어지므로 개인정보 유출 걱정 없이 안전합니다.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🎨 사용자 중심 디자인</h4>
+          <p>다크 모드 지원 및 반응형 웹 디자인을 통해 어떤 기기에서도 최적화된 사용자 경험을 제공하기 위해 노력하고 있습니다.</p>
+        </div>
+        <div class="feature-item">
+          <h4>🎰 행운의 알고리즘</h4>
+          <p>로또 번호 추천기는 고유한 난수 생성 알고리즘을 통해 편중되지 않은 행운의 번호를 제공합니다.</p>
+        </div>
+      </div>
+
+      <h3 class="mt-4">개발자 소개</h3>
+      <p>우리는 인공지능과 웹 개발에 열정을 가진 팀입니다. 사용자분들의 피드백을 통해 지속적으로 서비스를 업데이트하고 있으며, 앞으로도 더 다양하고 유익한 기능을 추가할 예정입니다.</p>
+
+      <div class="text-center mt-4">
+        <a href="/"><button>지금 바로 체험해보기</button></a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-links">
+      <a href="/">홈으로 돌아가기</a>
+      <a href="privacy-policy.html">개인정보처리방침</a>
+      <a href="terms.html">이용약관</a>
+    </div>
+    <div>
+      &copy; 2026 동물상 & 로또 AI 연구소. All rights reserved.
+    </div>
+  </footer>
+</body>
+</html>

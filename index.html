@@ -3,245 +3,122 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>인공지능 동물상 테스트 & 로또 추천기</title>
+  <title>동물상 테스트 & 로또 번호 추천 AI - 당신의 닮은꼴 동물을 찾아보세요</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="AI 기반의 동물상 테스트와 로또 번호 추천 서비스를 제공합니다. 당신의 얼굴이 강아지상인지 고양이상인지 인공지능이 분석해드립니다. 재미있는 로또 번호 조합도 생성해보세요.">
+  <meta name="keywords" content="동물상 테스트, AI 테스트, 로또 추천, 로또 번호 생성기, 강아지상, 고양이상, 인공지능 테스트">
+  <meta name="author" content="동물상 & 로또 AI 연구소">
+  
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="인공지능 동물상 테스트 & 로또 추천">
+  <meta property="og:description" content="AI가 당신의 얼굴을 분석하여 닮은 동물상을 찾아드립니다. 행운의 로또 번호도 추천받아보세요!">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://your-site-url.com">
+  <meta property="og:image" content="https://your-site-url.com/og-image.png">
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="style.css">
 
   <!-- TensorFlow.js and Teachable Machine Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-
-  <style>
-    /* Global box-sizing for all elements to prevent overflow */
-    * {
-      box-sizing: border-box;
-    }
-
-    :root {
-      --bg-color: #f6f7fb;
-      --text-color: #111;
-      --card-bg: #fff;
-      --card-shadow: rgba(0,0,0,0.05);
-      --btn-bg: #1f6feb;
-      --btn-color: white;
-      --set-bg: #f3f6ff;
-      --ball-bg: #fff;
-      --ball-border: #ddd;
-      --progress-bg: #e0e0e0;
-    }
-
-    body.dark-mode {
-      --bg-color: #0d1117;
-      --text-color: #c9d1d9;
-      --card-bg: #161b22;
-      --card-shadow: rgba(0,0,0,0.3);
-      --btn-bg: #238636;
-      --btn-color: white;
-      --set-bg: #21262d;
-      --ball-bg: #30363d;
-      --ball-border: #444c56;
-      --progress-bg: #30363d;
-    }
-
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, "Noto Sans KR", sans-serif;
-      background: var(--bg-color);
-      color: var(--text-color);
-      transition: background 0.3s, color 0.3s;
-      overflow-x: hidden;
-    }
-
-    .wrap {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 28px 16px;
-      width: 100%;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 6px 20px var(--card-shadow);
-      margin-bottom: 24px;
-      width: 100%;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    h1 { margin: 0; font-size: 22px; }
-    h2 { margin-top: 0; font-size: 18px; margin-bottom: 16px; }
-
-    button {
-      border: 0;
-      background: var(--btn-bg);
-      color: var(--btn-color);
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-
-    button:hover { opacity: 0.9; }
-
-    #themeToggle {
-      background: transparent;
-      border: 1px solid var(--btn-bg);
-      color: var(--btn-bg);
-      padding: 6px 12px;
-    }
-
-    body.dark-mode #themeToggle {
-      border-color: #c9d1d9;
-      color: #c9d1d9;
-    }
-
-    /* AI Section Styles */
-    #image-selector {
-      width: 100%;
-      border: 2px dashed var(--ball-border);
-      border-radius: 12px;
-      padding: 40px 20px;
-      text-align: center;
-      cursor: pointer;
-      margin-bottom: 20px;
-      transition: all 0.3s;
-      display: block; /* Ensure it stays in flow */
-    }
-
-    #image-selector:hover { border-color: var(--btn-bg); background: rgba(31, 111, 235, 0.05); }
-    
-    #preview-image {
-      max-width: 100%;
-      height: auto;
-      border-radius: 12px;
-      display: none;
-      margin: 0 auto 20px;
-    }
-
-    .result-label {
-      font-weight: 700;
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 12px;
-      background: var(--progress-bg);
-      border-radius: 6px;
-      overflow: hidden;
-      margin-bottom: 16px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--btn-bg);
-      width: 0%;
-      transition: width 0.8s cubic-bezier(0.17, 0.67, 0.83, 0.67);
-    }
-
-    /* Lotto Styles */
-    .result { display: flex; flex-direction: column; gap: 14px; }
-    .set {
-      display: flex; gap: 8px; flex-wrap: wrap; padding: 10px;
-      border-radius: 12px; background: var(--set-bg);
-    }
-    .ball {
-      width: 42px; height: 42px; border-radius: 50%;
-      background: var(--ball-bg); border: 1px solid var(--ball-border);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: bold; box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      color: var(--text-color);
-    }
-    .set-label { width: 60px; font-weight: 700; display: flex; align-items: center; }
-
-    /* Form Styles */
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-    .form-group input, .form-group textarea {
-      width: 100%; padding: 12px; border-radius: 8px;
-      border: 1px solid var(--ball-border); background: var(--ball-bg);
-      color: var(--text-color); box-sizing: border-box; font-family: inherit;
-    }
-
-    #loading-msg {
-      padding: 20px;
-      font-weight: 600;
-      color: var(--btn-bg);
-    }
-
-    .retry-btn {
-      margin-top: 10px;
-      background: transparent;
-      color: var(--text-color);
-      border: 1px solid var(--ball-border);
-      font-size: 14px;
-      padding: 8px 12px;
-    }
-
-  </style>
 </head>
 
 <body>
+  <!-- Navigation Menu -->
+  <header>
+    <div class="nav-container">
+      <a href="/" class="logo">🐾 동물상 & 로또 AI</a>
+      <nav class="nav-links">
+        <a href="#animal-test">동물상 테스트</a>
+        <a href="#lotto-gen">로또 추천</a>
+        <a href="about.html">소개</a>
+        <a href="privacy-policy.html">개인정보처리방침</a>
+      </nav>
+    </div>
+  </header>
+
   <div class="wrap">
-    <!-- Header -->
-    <div class="header">
+    <!-- Header Hero -->
+    <div class="header-main">
       <h1>동물상 & 로또 AI</h1>
       <button id="themeToggle">테마 변경</button>
     </div>
 
+    <div class="info-text">
+      안녕하세요! 인공지능 기술을 활용하여 당신의 매력을 발견하고 행운을 찾아드리는 <strong>동물상 & 로또 AI</strong> 서비스입니다. 구글의 Teachable Machine 기술을 바탕으로 수많은 데이터를 학습한 AI 모델이 정교하게 분석합니다.
+    </div>
+
     <!-- AI Animal Test Card -->
-    <div class="card">
+    <div class="card" id="animal-test">
       <h2>🐾 인공지능 동물상 테스트</h2>
-      <p style="font-size: 14px; opacity: 0.8; margin-bottom: 20px;">
-        얼굴 사진을 올려 강아지상인지 고양이상인지 AI가 분석해드립니다!
+      <p>
+        당신의 얼굴은 어떤 동물을 닮았나요? 얼굴 사진 한 장으로 당신의 매력을 분석해드립니다. 강아지상, 고양이상 등 당신의 얼굴형에 가장 가까운 동물을 인공지능이 알려드립니다.
       </p>
       
       <div id="image-selector" onclick="document.getElementById('upload-input').click()">
         <span>이곳을 클릭하여 사진 업로드</span>
-        <input type="file" id="upload-input" accept="image/*" style="display:none" onchange="previewFile()">
+        <input type="file" id="upload-input" accept="image/*" style="display:none">
       </div>
       
       <img id="preview-image" src="#" alt="미리보기">
       
-      <div id="loading-msg" style="display:none; text-align:center;">
-        <p>인공지능이 이미지를 분석 중입니다...</p>
+      <div id="loading-msg" style="display:none;">
+        <p>인공지능이 이미지를 분석 중입니다. 잠시만 기다려주세요...</p>
       </div>
 
       <div id="label-container"></div>
       
-      <div id="action-buttons" style="display:none; text-align:center; margin-top: 10px;">
+      <div id="action-buttons" style="display:none; text-align:center;">
         <button class="retry-btn" onclick="location.reload()">다시 테스트하기</button>
+      </div>
+
+      <div class="mt-4" style="font-size: 13px; color: #888;">
+        * 업로드된 사진은 서버로 전송되지 않으며, 사용자 기기 내 브라우저에서 즉시 분석되어 폐기됩니다. 안심하고 사용하세요.
       </div>
     </div>
 
-    <!-- Lotto Card -->
-    <div class="card">
+    <div class="card" id="lotto-gen">
       <h2>🎰 로또 번호 추천기</h2>
-      <div class="row">
-        <button id="btnGen">번호 5세트 추천받기</button>
+      <p>
+        오늘의 행운을 믿어보세요! 인공지능 난수 알고리즘을 활용하여 재미로 보는 로또 번호를 추천해드립니다. 한 번의 클릭으로 5개의 세트를 생성할 수 있습니다.
+      </p>
+      
+      <div class="info-text" style="font-size: 14px; margin-bottom: 20px;">
+        <h3>로또 번호 추천기 활용 팁</h3>
+        <ul>
+          <li><strong>나만의 행운 번호:</strong> 생성된 번호 중 유난히 눈에 띄는 숫자가 있다면 당신의 행운 번호일 수 있습니다!</li>
+          <li><strong>재미를 위한 도구:</strong> 이 도구는 수학적 확률보다는 가벼운 즐거움을 위해 설계되었습니다.</li>
+          <li><strong>다양한 조합:</strong> 여러 번 버튼을 눌러 당신의 직감에 맞는 조합을 골라보세요.</li>
+        </ul>
+      </div>
+
+      <div class="row" style="text-align: center;">
+        <button id="btnGen">행운의 번호 5세트 추천받기</button>
       </div>
       <div id="result" class="result"></div>
+      
+      <div class="mt-4" style="font-size: 13px; color: #888;">
+        * 본 서비스에서 제공하는 번호는 재미를 위한 용도이며, 당첨을 보장하지 않습니다. 로또 구매는 본인의 선택이며, 만 19세 미만 청소년은 복권 구매가 금지되어 있습니다.
+      </div>
     </div>
 
     <!-- Contact Card -->
     <div class="card contact-card">
-      <h2>📧 제휴 문의</h2>
+      <h2>📧 제휴 및 문의하기</h2>
+      <p>서비스 이용 중 불편한 점이나 제휴 제안이 있으시면 언제든지 문의해 주세요.</p>
       <form action="https://formspree.io/f/xeelvdoz" method="POST">
         <div class="form-group">
-          <label for="email">이메일 주소</label>
+          <label for="email">답변받으실 이메일 주소</label>
           <input type="email" name="email" id="email" placeholder="example@mail.com" required>
         </div>
         <div class="form-group">
           <label for="message">문의 내용</label>
-          <textarea name="message" id="message" rows="4" placeholder="문의하실 내용을 입력해주세요." required></textarea>
+          <textarea name="message" id="message" rows="4" placeholder="문의하실 내용을 입력해주세요. 상세하게 적어주시면 큰 도움이 됩니다." required></textarea>
         </div>
         <button type="submit">문의 보내기</button>
       </form>
@@ -249,131 +126,31 @@
 
     <!-- Comment Card -->
     <div class="card comment-card">
-      <h2>💬 댓글</h2>
+      <h2>💬 사용자 후기 및 댓글</h2>
+      <p>테스트 결과가 마음에 드셨나요? 여러분의 소중한 후기를 남겨주세요.</p>
       <livere-comment client-id="w6wwXG2EgyfXNGiQRbZj"></livere-comment>
       <script type="module" src="https://www.livere.org/livere-widget.js"></script>
     </div>
   </div>
 
-<script>
-// --- Theme Logic ---
-const themeToggle = document.getElementById('themeToggle');
-const body = document.body;
-if (localStorage.getItem('theme') === 'dark') body.classList.add('dark-mode');
-themeToggle.addEventListener('click', () => {
-  body.classList.toggle('dark-mode');
-  localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
-});
+  <footer>
+    <div class="footer-links">
+      <a href="about.html">서비스 소개</a>
+      <a href="privacy-policy.html">개인정보처리방침</a>
+      <a href="terms.html">이용약관</a>
+      <a href="sitemap.xml">사이트맵</a>
+    </div>
+    <div>
+      &copy; 2026 동물상 & 로또 AI 연구소. All rights reserved.
+    </div>
+    <div class="badge-container">
+      <span class="badge">AI Powered</span>
+      <span class="badge">No Data Storage</span>
+      <span class="badge">Safe & Secure</span>
+    </div>
+  </footer>
 
-// --- AI Animal Test Logic ---
-const MODEL_URL = "https://teachablemachine.withgoogle.com/models/dMLI4npjC/";
-let model, labelContainer, maxPredictions;
-let isModelLoading = false;
-
-async function initAI() {
-  if (model || isModelLoading) return;
-  isModelLoading = true;
-  try {
-    const modelURL = MODEL_URL + "model.json";
-    const metadataURL = MODEL_URL + "metadata.json";
-    model = await tmImage.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
-    labelContainer = document.getElementById("label-container");
-  } catch (e) {
-    console.error("Model load failed", e);
-  } finally {
-    isModelLoading = false;
-  }
-}
-
-async function previewFile() {
-  const preview = document.getElementById('preview-image');
-  const file = document.getElementById('upload-input').files[0];
-  const reader = new FileReader();
-
-  if (!file) return;
-
-  reader.onloadend = async function () {
-    preview.src = reader.result;
-    preview.style.display = 'block';
-    document.getElementById('image-selector').style.display = 'none';
-    document.getElementById('loading-msg').style.display = 'block';
-    
-    preview.onload = async function() {
-      if(!model) await initAI();
-      await predict();
-      document.getElementById('loading-msg').style.display = 'none';
-      document.getElementById('action-buttons').style.display = 'block';
-    };
-  }
-  reader.readAsDataURL(file);
-}
-
-async function predict() {
-  if (!model) return;
-  const image = document.getElementById("preview-image");
-  const prediction = await model.predict(image);
-  
-  labelContainer.innerHTML = "";
-  for (let i = 0; i < maxPredictions; i++) {
-    // Robust class name matching
-    let className = prediction[i].className.toLowerCase();
-    let displayName = "알 수 없음";
-    
-    if (className.includes("dog") || className.includes("강아지")) {
-      displayName = "강아지상 🐶";
-    } else if (className.includes("cat") || className.includes("고양이")) {
-      displayName = "고양이상 🐱";
-    } else {
-      displayName = prediction[i].className; // Fallback to raw name
-    }
-
-    const probability = (prediction[i].probability * 100).toFixed(0);
-    
-    const labelWrapper = document.createElement("div");
-    labelWrapper.innerHTML = `
-      <div class="result-label">
-        <span>${displayName}</span>
-        <span>${probability}%</span>
-      </div>
-      <div class="progress-bar">
-        <div class="progress-fill" style="width: ${probability}%"></div>
-      </div>
-    `;
-    labelContainer.appendChild(labelWrapper);
-  }
-}
-
-// --- Lotto Logic ---
-function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-function pickOneSet() {
-  const set = new Set();
-  while (set.size < 6) set.add(randInt(1, 45));
-  return Array.from(set).sort((a,b) => a-b);
-}
-function generateFiveSets() {
-  const resultDiv = document.getElementById("result");
-  resultDiv.innerHTML = "";
-  for (let i = 1; i <= 5; i++) {
-    const numbers = pickOneSet();
-    const setDiv = document.createElement("div");
-    setDiv.className = "set";
-    const label = document.createElement("div");
-    label.className = "set-label";
-    label.textContent = i + "세트";
-    setDiv.appendChild(label);
-    numbers.forEach(n => {
-      const ball = document.createElement("div");
-      ball.className = "ball";
-      ball.textContent = n;
-      setDiv.appendChild(ball);
-    });
-    resultDiv.appendChild(setDiv);
-  }
-}
-document.getElementById("btnGen").addEventListener("click", generateFiveSets);
-
-window.addEventListener('load', initAI);
-</script>
+  <!-- External Script -->
+  <script src="main.js"></script>
 </body>
 </html>
