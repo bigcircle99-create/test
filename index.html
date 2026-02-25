@@ -10,6 +10,11 @@
   <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
   <style>
+    /* Global box-sizing for all elements to prevent overflow */
+    * {
+      box-sizing: border-box;
+    }
+
     :root {
       --bg-color: #f6f7fb;
       --text-color: #111;
@@ -42,12 +47,14 @@
       background: var(--bg-color);
       color: var(--text-color);
       transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
     }
 
     .wrap {
       max-width: 720px;
       margin: 0 auto;
       padding: 28px 16px;
+      width: 100%;
     }
 
     .card {
@@ -56,6 +63,7 @@
       padding: 24px;
       box-shadow: 0 6px 20px var(--card-shadow);
       margin-bottom: 24px;
+      width: 100%;
     }
 
     .header {
@@ -103,7 +111,7 @@
       cursor: pointer;
       margin-bottom: 20px;
       transition: all 0.3s;
-      box-sizing: border-box;
+      display: block; /* Ensure it stays in flow */
     }
 
     #image-selector:hover { border-color: var(--btn-bg); background: rgba(31, 111, 235, 0.05); }
@@ -291,7 +299,6 @@ async function previewFile() {
     document.getElementById('image-selector').style.display = 'none';
     document.getElementById('loading-msg').style.display = 'block';
     
-    // Ensure image is fully loaded before prediction
     preview.onload = async function() {
       if(!model) await initAI();
       await predict();
@@ -308,16 +315,25 @@ async function predict() {
   const prediction = await model.predict(image);
   
   labelContainer.innerHTML = "";
-  // Sort predictions to show highest probability first if needed, 
-  // but here we keep fixed order for Dog/Cat comparison.
   for (let i = 0; i < maxPredictions; i++) {
-    const className = prediction[i].className === "Dog" ? "강아지상 🐶" : "고양이상 🐱";
+    // Robust class name matching
+    let className = prediction[i].className.toLowerCase();
+    let displayName = "알 수 없음";
+    
+    if (className.includes("dog") || className.includes("강아지")) {
+      displayName = "강아지상 🐶";
+    } else if (className.includes("cat") || className.includes("고양이")) {
+      displayName = "고양이상 🐱";
+    } else {
+      displayName = prediction[i].className; // Fallback to raw name
+    }
+
     const probability = (prediction[i].probability * 100).toFixed(0);
     
     const labelWrapper = document.createElement("div");
     labelWrapper.innerHTML = `
       <div class="result-label">
-        <span>${className}</span>
+        <span>${displayName}</span>
         <span>${probability}%</span>
       </div>
       <div class="progress-bar">
@@ -357,7 +373,6 @@ function generateFiveSets() {
 }
 document.getElementById("btnGen").addEventListener("click", generateFiveSets);
 
-// Background init
 window.addEventListener('load', initAI);
 </script>
 </body>
