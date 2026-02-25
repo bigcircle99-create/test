@@ -1,14 +1,144 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>로또 번호 추천기</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Noto Sans KR", sans-serif;
+      background: #f6f7fb;
+      color: #111;
+    }
+
+    .wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 28px 16px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 22px;
+    }
+
+    .row {
+      margin-bottom: 16px;
+    }
+
+    button {
+      border: 0;
+      background: #1f6feb;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .result {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .set {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 10px;
+      border-radius: 12px;
+      background: #f3f6ff;
+    }
+
+    .ball {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #fff;
+      border: 1px solid #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .set-label {
+      width: 60px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+    }
+
+  </style>
 </head>
+
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+  <div class="wrap">
+    <div class="card">
+      <h1>로또 번호 추천기 (6/45)</h1>
+
+      <div class="row">
+        <button id="btnGen">번호 5세트 추천받기</button>
+      </div>
+
+      <div id="result" class="result"></div>
+    </div>
+  </div>
+
+<script>
+
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function pickOneSet() {
+  const set = new Set();
+  while (set.size < 6) {
+    set.add(randInt(1, 45));
+  }
+  return Array.from(set).sort((a,b) => a-b);
+}
+
+function generateFiveSets() {
+  const resultDiv = document.getElementById("result");
+  resultDiv.innerHTML = "";
+
+  for (let i = 1; i <= 5; i++) {
+    const numbers = pickOneSet();
+
+    const setDiv = document.createElement("div");
+    setDiv.className = "set";
+
+    const label = document.createElement("div");
+    label.className = "set-label";
+    label.textContent = i + "세트";
+    setDiv.appendChild(label);
+
+    numbers.forEach(n => {
+      const ball = document.createElement("div");
+      ball.className = "ball";
+      ball.textContent = n;
+      setDiv.appendChild(ball);
+    });
+
+    resultDiv.appendChild(setDiv);
+  }
+}
+
+document.getElementById("btnGen").addEventListener("click", generateFiveSets);
+
+</script>
 </body>
 </html>
