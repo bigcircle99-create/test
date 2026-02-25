@@ -127,6 +127,45 @@
       align-items: center;
     }
 
+    .contact-card {
+      margin-top: 24px;
+    }
+
+    .contact-card h2 {
+      margin-top: 0;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .form-group input, 
+    .form-group textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--ball-border);
+      background: var(--ball-bg);
+      color: var(--text-color);
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    .form-group input:focus, 
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--btn-bg);
+    }
+
   </style>
 </head>
 
@@ -143,6 +182,21 @@
       </div>
 
       <div id="result" class="result"></div>
+    </div>
+
+    <div class="card contact-card">
+      <h2>제휴 문의</h2>
+      <form action="https://formspree.io/f/xeelvdoz" method="POST">
+        <div class="form-group">
+          <label for="email">이메일 주소</label>
+          <input type="email" name="email" id="email" placeholder="example@mail.com" required>
+        </div>
+        <div class="form-group">
+          <label for="message">문의 내용</label>
+          <textarea name="message" id="message" rows="4" placeholder="문의하실 내용을 입력해주세요." required></textarea>
+        </div>
+        <button type="submit">문의 보내기</button>
+      </form>
     </div>
   </div>
 
